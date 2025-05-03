@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Music Generation</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="description" content="Generate original music using AI from text descriptions, images, or your own humming">
+    <meta name="theme-color" content="#6200ea">
+</head>
+<body>
+    <header>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+            <i class="fas fa-moon"></i>
+        </button>
+        <div class="container">
+            <h1>AI Music <span class="text-gradient">Generation</span></h1>
+            <p>Create original music from text descriptions, images, or your own humming using advanced AI models</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-button active" data-tab="text-tab">
+                <i class="fas fa-font"></i> Text to Music
+            </button>
+            <button class="tab-button" data-tab="image-tab">
+                <i class="fas fa-image"></i> Image to Music
+            </button>
+            <button class="tab-button" data-tab="audio-tab">
+                <i class="fas fa-microphone"></i> Hum to Music
+            </button>
+        </div>
+
+        <!-- Text to Music Tab -->
+        <div id="text-tab" class="tab-content active">
+            <h2><i class="fas fa-font"></i> Generate Music from Text</h2>
+            <p>Enter a description of the music you want to create. Be as specific as possible about the mood, instruments, tempo, and style to get the best results.</p>
+
+            <div class="card">
+                <form id="text-form">
+                    <div class="form-group">
+                        <label for="text-prompt">Text Prompt:</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-quote-left"></i>
+                            <textarea id="text-prompt" rows="4" placeholder="e.g., 'A calm piano melody with soft strings in the background, like a peaceful morning by the lake'" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="music-parameters">
+                        <div class="parameters-title">
+                            <i class="fas fa-sliders-h"></i> Music Parameters (Optional)
+                        </div>
+
+                        <div class="parameter-group">
+                            <label for="text-genre">Genre:</label>
+                            <select id="text-genre" class="form-control">
+                                <option value="">Select a genre (optional)</option>
+                                <option value="classical">Classical</option>
+                                <option value="jazz">Jazz</option>
+                                <option value="rock">Rock</option>
+                                <option value="electronic">Electronic</option>
+                                <option value="ambient">Ambient</option>
+                                <option value="pop">Pop</option>
+                                <option value="folk">Folk</option>
+                                <option value="cinematic">Cinematic</option>
+                                <option value="lofi">Lo-Fi</option>
+                            </select>
+                        </div>
+
+                        <div class="parameter-group">
+                            <div class="parameter-label">
+                                <span>Tempo:</span>
+                                <span class="parameter-value" id="text-tempo-value">120 BPM</span>
+                            </div>
+                            <div class="slider-container">
+                                <span>Slow</span>
+                                <input type="range" id="text-tempo" min="40" max="200" value="120" class="slider">
+                                <span>Fast</span>
+                            </div>
+                        </div>
+
+                        <div class="parameter-group">
+                            <div class="parameter-label">
+                                <span>Mood:</span>
+                                <span class="parameter-value" id="text-mood-value">Neutral</span>
+                            </div>
+                            <div class="slider-container">
+                                <span>Sad</span>
+                                <input type="range" id="text-mood" min="0" max="100" value="50" class="slider">
+                                <span>Happy</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <button type="submit" class="button">
+                            <i class="fas fa-magic"></i> Generate Music
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="text-loading" class="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Creating your music...</div>
+                <div class="loading-subtext">Our AI is composing a unique piece based on your description. This typically takes 1-2 minutes.</div>
+                <div class="loading-progress">
+                    <div class="loading-progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="text-error" class="error-message message"></div>
+
+            <div id="text-result" class="result-section">
+                <div class="result-title">
+                    <i class="fas fa-music"></i> Your Generated Music
+                </div>
+
+                <div class="audio-player">
+                    <div class="audio-controls">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div id="text-waveform" class="waveform"></div>
+                    </div>
+
+                    <div class="audio-info">
+                        <span class="current-time">0:00</span>
+                        <span class="total-time">0:00</span>
+                    </div>
+
+                    <audio id="text-audio-player" style="display: none;"></audio>
+                </div>
+
+                <div class="download-section">
+                    <p>Like what you hear? Download your music to use anywhere.</p>
+                    <a id="text-download-link" class="button" download>
+                        <i class="fas fa-download"></i> Download Music
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image to Music Tab -->
+        <div id="image-tab" class="tab-content">
+            <h2><i class="fas fa-image"></i> Generate Music from Image</h2>
+            <p>Upload an image and our AI will create music inspired by it. The system analyzes colors, composition, and content to generate a matching musical piece that captures the mood and essence of your image.</p>
+
+            <div class="card">
+                <form id="image-form">
+                    <div class="form-group">
+                        <label for="image-input">Upload Image:</label>
+                        <div id="image-dropzone" class="dropzone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag and drop an image here, or click to select a file</p>
+                            <input type="file" id="image-input" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="preview-container">
+                            <img id="image-preview" class="preview-image" style="display: none;">
+                            <div class="preview-overlay">
+                                <button type="button" class="button button-small" id="change-image-button">
+                                    <i class="fas fa-exchange-alt"></i> Change Image
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="music-parameters">
+                        <div class="parameters-title">
+                            <i class="fas fa-sliders-h"></i> Music Parameters (Optional)
+                        </div>
+
+                        <div class="parameter-group">
+                            <label for="image-genre">Genre:</label>
+                            <select id="image-genre" class="form-control">
+                                <option value="">Select a genre (optional)</option>
+                                <option value="classical">Classical</option>
+                                <option value="jazz">Jazz</option>
+                                <option value="rock">Rock</option>
+                                <option value="electronic">Electronic</option>
+                                <option value="ambient">Ambient</option>
+                                <option value="pop">Pop</option>
+                                <option value="folk">Folk</option>
+                                <option value="cinematic">Cinematic</option>
+                                <option value="lofi">Lo-Fi</option>
+                            </select>
+                        </div>
+
+                        <div class="parameter-group">
+                            <div class="parameter-label">
+                                <span>Tempo:</span>
+                                <span class="parameter-value" id="image-tempo-value">120 BPM</span>
+                            </div>
+                            <div class="slider-container">
+                                <span>Slow</span>
+                                <input type="range" id="image-tempo" min="40" max="200" value="120" class="slider">
+                                <span>Fast</span>
+                            </div>
+                        </div>
+
+                        <div class="parameter-group">
+                            <div class="parameter-label">
+                                <span>Mood Influence:</span>
+                                <span class="parameter-value" id="image-mood-value">Balanced</span>
+                            </div>
+                            <div class="slider-container">
+                                <span>Subtle</span>
+                                <input type="range" id="image-mood" min="0" max="100" value="50" class="slider">
+                                <span>Strong</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <button type="submit" id="generate-image-button" class="button" disabled>
+                            <i class="fas fa-magic"></i> Generate Music
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="image-loading" class="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Analyzing your image...</div>
+                <div class="loading-subtext">Our AI is interpreting the visual elements and composing a unique piece that matches the mood and content of your image. This typically takes 1-2 minutes.</div>
+                <div class="loading-progress">
+                    <div class="loading-progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="image-error" class="error-message message"></div>
+
+            <div id="image-result" class="result-section">
+                <div class="result-title">
+                    <i class="fas fa-music"></i> Your Generated Music
+                </div>
+
+                <div class="audio-player">
+                    <div class="audio-controls">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div id="image-waveform" class="waveform"></div>
+                    </div>
+
+                    <div class="audio-info">
+                        <span class="current-time">0:00</span>
+                        <span class="total-time">0:00</span>
+                    </div>
+
+                    <audio id="image-audio-player" style="display: none;"></audio>
+                </div>
+
+                <div class="download-section">
+                    <p>Like what you hear? Download your music to use anywhere.</p>
+                    <a id="image-download-link" class="button" download>
+                        <i class="fas fa-download"></i> Download Music
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio to Music Tab -->
+        <div id="audio-tab" class="tab-content">
+            <h2><i class="fas fa-microphone"></i> Generate Music from Humming</h2>
+            <p>Upload a recording of your humming or singing, and our AI will transform it into a full musical composition while preserving your melody. This is perfect for capturing musical ideas quickly.</p>
+
+            <div class="card">
+                <form id="audio-form">
+                    <div class="form-group">
+                        <label for="audio-input">Upload Audio:</label>
+                        <div id="audio-dropzone" class="dropzone">
+                            <i class="fas fa-microphone-alt"></i>
+                            <p>Drag and drop an audio file here, or click to select a file</p>
+                            <input type="file" id="audio-input" accept="audio/*" style="display: none;">
+                        </div>
+                        <div class="audio-preview-container mt-2" style="display: none;">
+                            <div class="parameters-title mb-2">
+                                <i class="fas fa-headphones"></i> Your Audio
+                            </div>
+                            <audio id="audio-preview-player" controls style="width: 100%;"></audio>
+                            <button type="button" class="button button-small button-outline mt-2" id="change-audio-button">
+                                <i class="fas fa-exchange-alt"></i> Change Audio
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="music-parameters">
+                        <div class="parameters-title">
+                            <i class="fas fa-sliders-h"></i> Music Parameters (Optional)
+                        </div>
+
+                        <div class="parameter-group">
+                            <label for="audio-genre">Genre:</label>
+                            <select id="audio-genre" class="form-control">
+                                <option value="">Select a genre (optional)</option>
+                                <option value="classical">Classical</option>
+                                <option value="jazz">Jazz</option>
+                                <option value="rock">Rock</option>
+                                <option value="electronic">Electronic</option>
+                                <option value="ambient">Ambient</option>
+                                <option value="pop">Pop</option>
+                                <option value="folk">Folk</option>
+                                <option value="cinematic">Cinematic</option>
+                                <option value="lofi">Lo-Fi</option>
+                            </select>
+                        </div>
+
+                        <div class="parameter-group">
+                            <div class="parameter-label">
+                                <span>Tempo Adjustment:</span>
+                                <span class="parameter-value" id="audio-tempo-value">No Change</span>
+                            </div>
+                            <div class="slider-container">
+                                <span>Slower</span>
+                                <input type="range" id="audio-tempo" min="-50" max="50" value="0" class="slider">
+                                <span>Faster</span>
+                            </div>
+                        </div>
+
+                        <div class="parameter-group">
+                            <div class="parameter-label">
+                                <span>Arrangement Complexity:</span>
+                                <span class="parameter-value" id="audio-complexity-value">Balanced</span>
+                            </div>
+                            <div class="slider-container">
+                                <span>Simple</span>
+                                <input type="range" id="audio-complexity" min="0" max="100" value="50" class="slider">
+                                <span>Complex</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <button type="submit" id="generate-audio-button" class="button" disabled>
+                            <i class="fas fa-magic"></i> Generate Music
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="audio-loading" class="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Transforming your melody...</div>
+                <div class="loading-subtext">Our AI is analyzing your audio and creating a full musical arrangement based on your melody. This typically takes 1-2 minutes.</div>
+                <div class="loading-progress">
+                    <div class="loading-progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="audio-error" class="error-message message"></div>
+
+            <div id="audio-result" class="result-section">
+                <div class="result-title">
+                    <i class="fas fa-music"></i> Your Generated Music
+                </div>
+
+                <div class="audio-player">
+                    <div class="audio-controls">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div id="audio-waveform" class="waveform"></div>
+                    </div>
+
+                    <div class="audio-info">
+                        <span class="current-time">0:00</span>
+                        <span class="total-time">0:00</span>
+                    </div>
+
+                    <audio id="audio-generated-player" style="display: none;"></audio>
+                </div>
+
+                <div class="download-section">
+                    <p>Like what you hear? Download your music to use anywhere.</p>
+                    <a id="audio-download-link" class="button" download>
+                        <i class="fas fa-download"></i> Download Music
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">AI Music Generation</div>
+                <p>Create beautiful, original music in seconds using our state-of-the-art AI models. Perfect for content creators, musicians, and anyone who needs custom music.</p>
+                <p>&copy; 2023 AI Music Generation | Powered by PyTorch and Flask</p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WaveSurfer.js for audio visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/6.6.3/wavesurfer.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dark mode toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+
+            // Check for saved theme preference or use preferred color scheme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark-theme');
+                themeIcon.className = 'fas fa-sun';
+            }
+
+            // Theme toggle click handler
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-theme');
+                const isDark = document.body.classList.contains('dark-theme');
+
+                // Update icon
+                themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+
+                // Save preference
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+
+            // Image change button
+            const changeImageButton = document.getElementById('change-image-button');
+            if (changeImageButton) {
+                changeImageButton.addEventListener('click', function() {
+                    document.getElementById('image-input').click();
+                });
+            }
+
+            // Audio change button
+            const changeAudioButton = document.getElementById('change-audio-button');
+            if (changeAudioButton) {
+                changeAudioButton.addEventListener('click', function() {
+                    document.getElementById('audio-input').click();
+                });
+            }
+
+            // Loading progress animation
+            function simulateProgress(loadingId) {
+                const progressBar = document.querySelector(`#${loadingId} .loading-progress-bar`);
+                if (!progressBar) return;
+
+                let width = 0;
+                const interval = setInterval(function() {
+                    if (width >= 90) {
+                        clearInterval(interval);
+                    } else {
+                        width += Math.random() * 5;
+                        progressBar.style.width = Math.min(width, 90) + '%';
+                    }
+                }, 1000);
+
+                // Store the interval ID on the element for later cleanup
+                progressBar.dataset.intervalId = interval;
+
+                return {
+                    complete: function() {
+                        clearInterval(interval);
+                        progressBar.style.width = '100%';
+                    }
+                };
+            }
+
+            // Override the original generation functions to add progress simulation
+            const originalGenerateFromText = window.generateFromText;
+            window.generateFromText = function() {
+                const progress = simulateProgress('text-loading');
+                originalGenerateFromText.apply(this, arguments);
+
+                // Listen for when the result appears
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.attributeName === 'style' &&
+                            document.getElementById('text-result').style.display === 'block') {
+                            progress.complete();
+                            observer.disconnect();
+                        }
+                    });
+                });
+
+                observer.observe(document.getElementById('text-result'), { attributes: true });
+            };
+
+            const originalGenerateFromImage = window.generateFromImage;
+            window.generateFromImage = function() {
+                const progress = simulateProgress('image-loading');
+                originalGenerateFromImage.apply(this, arguments);
+
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.attributeName === 'style' &&
+                            document.getElementById('image-result').style.display === 'block') {
+                            progress.complete();
+                            observer.disconnect();
+                        }
+                    });
+                });
+
+                observer.observe(document.getElementById('image-result'), { attributes: true });
+            };
+
+            const originalGenerateFromAudio = window.generateFromAudio;
+            window.generateFromAudio = function() {
+                const progress = simulateProgress('audio-loading');
+                originalGenerateFromAudio.apply(this, arguments);
+
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.attributeName === 'style' &&
+                            document.getElementById('audio-result').style.display === 'block') {
+                            progress.complete();
+                            observer.disconnect();
+                        }
+                    });
+                });
+
+                observer.observe(document.getElementById('audio-result'), { attributes: true });
+            };
+
+            // Update slider value displays
+            // Text tab sliders
+            const textTempo = document.getElementById('text-tempo');
+            const textTempoValue = document.getElementById('text-tempo-value');
+            if (textTempo && textTempoValue) {
+                textTempo.addEventListener('input', function() {
+                    textTempoValue.textContent = this.value + ' BPM';
+                });
+            }
+
+            const textMood = document.getElementById('text-mood');
+            const textMoodValue = document.getElementById('text-mood-value');
+            if (textMood && textMoodValue) {
+                textMood.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    let moodText = 'Neutral';
+                    if (value < 30) moodText = 'Sad';
+                    else if (value < 45) moodText = 'Melancholic';
+                    else if (value < 55) moodText = 'Neutral';
+                    else if (value < 70) moodText = 'Uplifting';
+                    else moodText = 'Happy';
+                    textMoodValue.textContent = moodText;
+                });
+            }
+
+            // Image tab sliders
+            const imageTempo = document.getElementById('image-tempo');
+            const imageTempoValue = document.getElementById('image-tempo-value');
+            if (imageTempo && imageTempoValue) {
+                imageTempo.addEventListener('input', function() {
+                    imageTempoValue.textContent = this.value + ' BPM';
+                });
+            }
+
+            const imageMood = document.getElementById('image-mood');
+            const imageMoodValue = document.getElementById('image-mood-value');
+            if (imageMood && imageMoodValue) {
+                imageMood.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    let influenceText = 'Balanced';
+                    if (value < 30) influenceText = 'Subtle';
+                    else if (value < 45) influenceText = 'Light';
+                    else if (value < 55) influenceText = 'Balanced';
+                    else if (value < 70) influenceText = 'Pronounced';
+                    else influenceText = 'Strong';
+                    imageMoodValue.textContent = influenceText;
+                });
+            }
+
+            // Audio tab sliders
+            const audioTempo = document.getElementById('audio-tempo');
+            const audioTempoValue = document.getElementById('audio-tempo-value');
+            if (audioTempo && audioTempoValue) {
+                audioTempo.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    if (value === 0) {
+                        audioTempoValue.textContent = 'No Change';
+                    } else if (value > 0) {
+                        audioTempoValue.textContent = value + '% Faster';
+                    } else {
+                        audioTempoValue.textContent = Math.abs(value) + '% Slower';
+                    }
+                });
+            }
+
+            const audioComplexity = document.getElementById('audio-complexity');
+            const audioComplexityValue = document.getElementById('audio-complexity-value');
+            if (audioComplexity && audioComplexityValue) {
+                audioComplexity.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    let complexityText = 'Balanced';
+                    if (value < 30) complexityText = 'Minimal';
+                    else if (value < 45) complexityText = 'Simple';
+                    else if (value < 55) complexityText = 'Balanced';
+                    else if (value < 70) complexityText = 'Rich';
+                    else complexityText = 'Complex';
+                    audioComplexityValue.textContent = complexityText;
+                });
+            }
+
+            // Show audio preview container when audio is selected
+            const audioInput = document.getElementById('audio-input');
+            const audioPreviewContainer = document.querySelector('.audio-preview-container');
+            if (audioInput && audioPreviewContainer) {
+                audioInput.addEventListener('change', function() {
+                    if (this.files.length) {
+                        audioPreviewContainer.style.display = 'block';
+                    }
+                });
+            }
+
+            // Trigger initial values
+            if (textTempo) textTempo.dispatchEvent(new Event('input'));
+            if (textMood) textMood.dispatchEvent(new Event('input'));
+            if (imageTempo) imageTempo.dispatchEvent(new Event('input'));
+            if (imageMood) imageMood.dispatchEvent(new Event('input'));
+            if (audioTempo) audioTempo.dispatchEvent(new Event('input'));
+            if (audioComplexity) audioComplexity.dispatchEvent(new Event('input'));
+        });
+    </script>
+</body>
+</html>
