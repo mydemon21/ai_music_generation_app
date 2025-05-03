@@ -29,7 +29,7 @@ A full-stack web application that generates original music compositions based on
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/ai-music-generation.git
+git clone https://github.com/mydemon21/ai-music-generation.git
 cd ai-music-generation
 ```
 
