@@ -1,6 +1,8 @@
-# AI Music Generation Web App
+# Harmony AI: Multimodal Music Generation Web App
 
 A full-stack web application that generates original music compositions based on multimodal inputs: text descriptions, images, or humming/audio.
+
+![Home Page](static/screenshots/home_page.png)
 
 ## Features
 
@@ -9,6 +11,20 @@ A full-stack web application that generates original music compositions based on
 - **Hum-to-Music**: Upload recordings of humming or singing to create full musical compositions
 - **Customization**: Adjust parameters like genre, tempo, and mood to fine-tune the generated music
 - **Download**: Save generated tracks as audio files
+
+## Screenshots
+
+### Text to Music
+![Text to Music](static/screenshots/text_to_music.png)
+
+### Image to Music
+![Image to Music](static/screenshots/image_to_music.png)
+
+### Audio to Music
+![Audio to Music](static/screenshots/audio_to_music.png)
+
+### Music Player
+![Music Player](static/screenshots/music_player.png)
 
 ## Technology Stack
 
@@ -29,8 +45,8 @@ A full-stack web application that generates original music compositions based on
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/ai-music-generation.git
-cd ai-music-generation
+git clone https://github.com/mydemon21/ai_music_generation_app.git
+cd ai_music_generation_app
 ```
 
 2. Create a virtual environment and activate it:
