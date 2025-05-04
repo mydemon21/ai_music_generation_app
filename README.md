@@ -17,13 +17,13 @@ A full-stack web application that generates original music compositions based on
 ### Text to Music
 ![Text to Music](static/screenshots/text_to_music.png)
 
-### Image to Music
+### Music Player
 ![Image to Music](static/screenshots/image_to_music.png)
 
 ### Audio to Music
 ![Audio to Music](static/screenshots/audio_to_music.png)
 
-### Music Player
+### Image to Music
 ![Music Player](static/screenshots/music_player.png)
 
 ## Technology Stack
