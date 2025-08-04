@@ -1,4 +1,4 @@
-# Harmony AI: Multimodal Music Generation Web App
+# Harmony AI: Multimodal Music Generation Web App...
 
 A full-stack web application that generates original music compositions based on multimodal inputs: text descriptions, images, or humming/audio.
 
